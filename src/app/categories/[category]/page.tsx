@@ -21,7 +21,7 @@ export default function CategoryPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const categoryParam = resolvedParams.category;
   
-  // Decode category parameter (e.g. Budget%20Finds -> Budget Finds)
+  // Decode category parameter
   const decodedCategory = decodeURIComponent(categoryParam);
 
   // Filter products by category
@@ -31,7 +31,7 @@ export default function CategoryPage({ params }: PageProps) {
 
   const handleSelectCategory = (category: string) => {
     if (category.toLowerCase() === "all") {
-      router.push("/products");
+      router.push("/");
     } else {
       router.push(`/categories/${encodeURIComponent(category)}`);
     }
@@ -41,11 +41,11 @@ export default function CategoryPage({ params }: PageProps) {
     <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32]">
       <Navbar />
 
-      <main className="flex-1 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-8">
         {/* Back Link */}
-        <Link href="/products" className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-500 hover:text-pink-500 mb-4 transition-colors">
+        <Link href="/" className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-500 hover:text-pink-500 mb-4 transition-colors">
           <ArrowLeft className="h-3 w-3" />
-          Back to all finds
+          Back to home
         </Link>
 
         {/* Category Header */}

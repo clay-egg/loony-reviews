@@ -20,3 +20,9 @@ UI rules:
 - Prefer soft borders over strong shadows.
 - Use readable but cute typography.
 - Keep spacing comfortable but not too large.
+
+Minimalist Page Layouts:
+- Homepage: Only Navbar, Hero (search & chips), ProductGrid, and Footer. No featured review highlights or why-follow decks.
+- Product Details: Single product image, rating, price, short review summary, buy buttons, and simple video link. No thumbnail gallery, pros/cons grid, or related items.
+- About: Single card with bio and contact email link. No forms or multi-column descriptions.
+- Content: Avoid long texts, keep review texts to 1-2 lines. Use simple clean buttons.
