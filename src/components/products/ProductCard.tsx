@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight, Heart } from "lucide-react";
 import { Product } from "@/types/product";
-import { RatingStars } from "./RatingStars";
 import { Button } from "@/components/ui/button";
 
 interface ProductCardProps {
@@ -48,13 +47,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
       {/* Content */}
       <div className="flex flex-1 flex-col p-2.5 justify-between">
         <div>
-          {/* Rating & Price */}
-          <div className="flex items-center justify-between mb-1">
-            <RatingStars rating={product.rating} showNumber />
-            <span className="text-[9px] font-extrabold text-pink-500 bg-pink-50 border border-pink-100/50 px-1.5 py-0.5 rounded-md">
-              {product.priceRange}
-            </span>
-          </div>
+
 
           {/* Title */}
           <Link href={`/products/${product.slug}`}>

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeft, Heart, AlertCircle } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { RatingStars } from "@/components/products/RatingStars";
 import { BuyButton } from "@/components/products/BuyButton";
 import { TikTokEmbed } from "@/components/products/TikTokEmbed";
 import { fetchProductBySlug } from "@/lib/products-service";
@@ -123,12 +122,7 @@ export default function ProductDetailPage({ params }: PageProps) {
 
           {/* Rating, Price & Title */}
           <div>
-            <div className="flex items-center justify-between border-b border-pink-50 pb-2 mb-2.5">
-              <RatingStars rating={product.rating} showNumber />
-              <span className="text-[10px] font-bold text-pink-500 bg-pink-50 border border-pink-100 px-2 py-0.5 rounded-full">
-                {product.priceRange}
-              </span>
-            </div>
+
 
             <h1 className="text-base font-extrabold text-neutral-800 mb-2 leading-tight">
               {product.title}

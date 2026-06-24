@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { RatingStars } from "@/components/products/RatingStars";
 import { Button } from "@/components/ui/button";
 import { 
   fetchProducts, 
@@ -45,8 +44,6 @@ const emptyForm = {
   category: "",
   description: "",
   reviewSummary: "",
-  rating: 4.5,
-  priceRange: "",
   images: "",
   tiktokUrl: "",
   shopLinks: {
@@ -55,8 +52,6 @@ const emptyForm = {
     lazada: "",
     amazon: "",
   },
-  pros: "",
-  cons: "",
   isFeatured: false,
   isHidden: false,
 };
@@ -110,8 +105,6 @@ export default function AdminPage() {
       category: product.category || "",
       description: product.description || "",
       reviewSummary: product.reviewSummary || "",
-      rating: product.rating || 0,
-      priceRange: product.priceRange || "",
       images: (product.images || []).join(", "),
       tiktokUrl: product.tiktokUrl || "",
       shopLinks: {
@@ -120,8 +113,6 @@ export default function AdminPage() {
         lazada: product.shopLinks?.lazada || "",
         amazon: product.shopLinks?.amazon || "",
       },
-      pros: (product.pros || []).join(", "),
-      cons: (product.cons || []).join(", "),
       isFeatured: !!product.isFeatured,
       isHidden: !!product.isHidden,
     });
@@ -172,13 +163,18 @@ export default function AdminPage() {
 
     try {
       if (selectedFile) {
-        // Convert to Base64 data URL to store directly in Firestore
-        uploadedImageUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = (err) => reject(err);
-          reader.readAsDataURL(selectedFile);
-        });
+        if (isFirebaseConfigured) {
+          // Upload to Firebase Storage
+          uploadedImageUrl = await uploadProductImage(selectedFile);
+        } else {
+          // Fallback to local Base64 string in Static Mode
+          uploadedImageUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (err) => reject(err);
+            reader.readAsDataURL(selectedFile);
+          });
+        }
       }
     } catch (uploadError) {
       console.error("Image upload error:", uploadError);
@@ -204,8 +200,8 @@ export default function AdminPage() {
       category: formData.category,
       description: formData.description,
       reviewSummary: formData.reviewSummary,
-      rating: Number(formData.rating),
-      priceRange: formData.priceRange,
+      rating: 0, // Hardcoded fallback
+      priceRange: "", // Hardcoded fallback
       images: finalImages,
       tiktokUrl: formData.tiktokUrl,
       shopLinks: {
@@ -214,8 +210,8 @@ export default function AdminPage() {
         lazada: formData.shopLinks.lazada || "",
         amazon: formData.shopLinks.amazon || "",
       },
-      pros: formData.pros.split(",").map(p => p.trim()).filter(Boolean),
-      cons: formData.cons.split(",").map(c => c.trim()).filter(Boolean),
+      pros: [], // Hardcoded fallback
+      cons: [], // Hardcoded fallback
       isFeatured: formData.isFeatured,
       isHidden: formData.isHidden,
     };
@@ -288,7 +284,6 @@ export default function AdminPage() {
   // Stats summary variables
   const totalPicks = products.length;
   const hiddenPicks = products.filter(p => p.isHidden).length;
-  const totalClicks = products.reduce((acc, p) => acc + (p.clickCount || 0), 0);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32] selection:bg-pink-100 selection:text-pink-600">
@@ -345,8 +340,8 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        {/* Stats Grid - 2 columns now */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="bg-white border border-pink-100 rounded-2xl p-3 text-center shadow-sm">
             <p className="text-[8px] uppercase tracking-widest text-neutral-400 font-extrabold">Total Picks</p>
             <p className="text-lg font-black text-pink-500 mt-0.5">{totalPicks}🌸</p>
@@ -354,10 +349,6 @@ export default function AdminPage() {
           <div className="bg-white border border-pink-100 rounded-2xl p-3 text-center shadow-sm">
             <p className="text-[8px] uppercase tracking-widest text-neutral-400 font-extrabold">Hidden Picks</p>
             <p className="text-lg font-black text-neutral-400 mt-0.5">{hiddenPicks}🔒</p>
-          </div>
-          <div className="bg-white border border-pink-100 rounded-2xl p-3 text-center shadow-sm">
-            <p className="text-[8px] uppercase tracking-widest text-neutral-400 font-extrabold">Clicks</p>
-            <p className="text-lg font-black text-[#a06200] mt-0.5">{totalClicks}💖</p>
           </div>
         </div>
 
@@ -431,24 +422,17 @@ export default function AdminPage() {
                     <h3 className="text-xs font-bold text-neutral-800 truncate mt-1">
                       {product.title}
                     </h3>
-                    
-                    <div className="flex items-center justify-between mt-1">
-                      <RatingStars rating={product.rating} className="scale-90 origin-left" />
-                      <span className="text-[9px] font-bold text-neutral-400">
-                        {product.priceRange || "N/A"}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
                 {/* Divider */}
                 <div className="border-t border-pink-50/60 w-full"></div>
 
-                {/* Bottom Row: Stats & Action Buttons */}
+                {/* Bottom Row: Action Buttons */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-neutral-400">
                     <ShoppingBag className="h-3 w-3 text-pink-300" />
-                    <span>Clicks: <strong className="text-neutral-600">{product.clickCount || 0}</strong></span>
+                    <span>Pick details</span>
                   </div>
 
                   <div className="flex items-center gap-1.5">
@@ -581,37 +565,11 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Review & Stats Section */}
+              {/* Review / Verdict Section */}
               <div className="space-y-3">
                 <h4 className="text-[8px] font-extrabold uppercase tracking-widest text-neutral-400 border-b border-pink-50/55 pb-1">
-                  Verdict & Rating
+                  Verdict
                 </h4>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 mb-1">Rating (0 - 5)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="5"
-                      step="0.1"
-                      placeholder="e.g., 4.8"
-                      value={formData.rating}
-                      onChange={(e) => setFormData(prev => ({ ...prev, rating: Number(e.target.value) }))}
-                      className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 mb-1">Price Range</label>
-                    <input
-                      type="text"
-                      placeholder="e.g., $10 - $15"
-                      value={formData.priceRange}
-                      onChange={(e) => setFormData(prev => ({ ...prev, priceRange: e.target.value }))}
-                      className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
-                    />
-                  </div>
-                </div>
 
                 <div>
                   <label className="block text-[10px] font-bold text-neutral-500 mb-1">Verdict Summary (1-2 lines)</label>
@@ -679,7 +637,7 @@ export default function AdminPage() {
                       onChange={(e) => {
                         setFormData(prev => ({ ...prev, images: e.target.value }));
                         setPreviewUrl(e.target.value.split(",")[0]?.trim() || "");
-                        setSelectedFile(null); // Clear selected file if using URL input
+                        setSelectedFile(null);
                       }}
                       className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
                     />
@@ -754,36 +712,6 @@ export default function AdminPage() {
                         ...prev, 
                         shopLinks: { ...prev.shopLinks, amazon: e.target.value } 
                       }))}
-                      className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Pros & Cons */}
-              <div className="space-y-3">
-                <h4 className="text-[8px] font-extrabold uppercase tracking-widest text-neutral-400 border-b border-pink-50/55 pb-1">
-                  Pros & Cons lists
-                </h4>
-                
-                <div className="grid grid-cols-1 gap-2.5">
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 mb-1">Pros (comma-separated)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Non-drying, Long lasting, Cheap"
-                      value={formData.pros}
-                      onChange={(e) => setFormData(prev => ({ ...prev, pros: e.target.value }))}
-                      className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 mb-1">Cons (comma-separated)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Smudges easily, Needs touch-ups"
-                      value={formData.cons}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cons: e.target.value }))}
                       className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
                     />
                   </div>
