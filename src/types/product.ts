@@ -20,6 +20,7 @@ export interface Product {
   pros: string[];
   cons: string[];
   isFeatured: boolean;
+  isHidden?: boolean;
   clickCount: number;
   createdAt: string; // ISO string representation of Firestore timestamp
   updatedAt: string; // ISO string representation of Firestore timestamp

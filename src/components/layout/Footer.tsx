@@ -54,6 +54,9 @@ export function Footer() {
               <li>
                 <Link href="/about" className="hover:text-pink-500 transition">About Me</Link>
               </li>
+              <li>
+                <Link href="/admin" className="hover:text-pink-500 transition flex items-center gap-0.5">Admin Console 🔑</Link>
+              </li>
             </ul>
           </div>
         </div>

@@ -7,9 +7,11 @@ import {
   updateDoc, 
   increment, 
   limit,
-  addDoc
+  addDoc,
+  deleteDoc
 } from "firebase/firestore";
-import { db, isFirebaseConfigured } from "./firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage, isFirebaseConfigured } from "./firebase";
 import { Product } from "@/types/product";
 import { SAMPLE_PRODUCTS } from "@/data/sample-products";
 
@@ -17,9 +19,9 @@ import { SAMPLE_PRODUCTS } from "@/data/sample-products";
  * Fetches all products.
  * Falls back to SAMPLE_PRODUCTS if Firebase is not configured or fails.
  */
-export async function fetchProducts(): Promise<Product[]> {
+export async function fetchProducts(includeHidden: boolean = false): Promise<Product[]> {
   if (!isFirebaseConfigured || !db) {
-    return SAMPLE_PRODUCTS;
+    return includeHidden ? SAMPLE_PRODUCTS : SAMPLE_PRODUCTS.filter(p => !p.isHidden);
   }
 
   try {
@@ -28,12 +30,19 @@ export async function fetchProducts(): Promise<Product[]> {
     
     if (querySnapshot.empty) {
       console.log("Firestore products collection is empty. Using sample data.");
-      return SAMPLE_PRODUCTS;
+      const fallbackList = includeHidden ? SAMPLE_PRODUCTS : SAMPLE_PRODUCTS.filter(p => !p.isHidden);
+      return fallbackList;
     }
 
     const products: Product[] = [];
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
+      
+      // Filter out hidden products in memory if includeHidden is false
+      if (!includeHidden && data.isHidden === true) {
+        return;
+      }
+      
       products.push({
         id: docSnap.id,
         ...data,
@@ -45,7 +54,7 @@ export async function fetchProducts(): Promise<Product[]> {
     return products;
   } catch (error) {
     console.error("Error fetching products from Firestore:", error);
-    return SAMPLE_PRODUCTS;
+    return includeHidden ? SAMPLE_PRODUCTS : SAMPLE_PRODUCTS.filter(p => !p.isHidden);
   }
 }
 
@@ -115,6 +124,91 @@ export async function trackProductClick(productId: string, platform?: string): P
 }
 
 /**
+ * Creates a new product in Firestore.
+ */
+export async function createProduct(productData: Omit<Product, "id" | "createdAt" | "updatedAt" | "clickCount">): Promise<string> {
+  if (!isFirebaseConfigured || !db) {
+    throw new Error("Firebase is not configured. Cannot perform write operations.");
+  }
+
+  try {
+    const productsRef = collection(db, "products");
+    const docRef = await addDoc(productsRef, {
+      ...productData,
+      clickCount: 0,
+      isFeatured: productData.isFeatured || false,
+      isHidden: productData.isHidden || false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating product:", error);
+    throw error;
+  }
+}
+
+/**
+ * Updates an existing product in Firestore.
+ */
+export async function updateProduct(productId: string, productData: Partial<Product>): Promise<void> {
+  if (!isFirebaseConfigured || !db) {
+    throw new Error("Firebase is not configured. Cannot perform write operations.");
+  }
+
+  try {
+    const productRef = doc(db, "products", productId);
+    // Strip metadata keys that shouldn't be overwritten as internal fields
+    const { id, createdAt, updatedAt, ...cleanData } = productData as any;
+    
+    await updateDoc(productRef, {
+      ...cleanData,
+      updatedAt: new Date(),
+    });
+  } catch (error) {
+    console.error(`Error updating product ${productId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes a product from Firestore.
+ */
+export async function deleteProduct(productId: string): Promise<void> {
+  if (!isFirebaseConfigured || !db) {
+    throw new Error("Firebase is not configured. Cannot perform write operations.");
+  }
+
+  try {
+    const productRef = doc(db, "products", productId);
+    await deleteDoc(productRef);
+  } catch (error) {
+    console.error(`Error deleting product ${productId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Toggles the isHidden status of a product in Firestore.
+ */
+export async function toggleProductVisibility(productId: string, isHidden: boolean): Promise<void> {
+  if (!isFirebaseConfigured || !db) {
+    throw new Error("Firebase is not configured. Cannot perform write operations.");
+  }
+
+  try {
+    const productRef = doc(db, "products", productId);
+    await updateDoc(productRef, {
+      isHidden,
+      updatedAt: new Date(),
+    });
+  } catch (error) {
+    console.error(`Error toggling visibility for product ${productId}:`, error);
+    throw error;
+  }
+}
+
+/**
  * Helper to build unique categories dynamically based on current product list.
  */
 export function getCategories(products: Product[]): string[] {
@@ -127,3 +221,30 @@ export function getCategories(products: Product[]): string[] {
   );
   return ["All", ...uniqueCategories];
 }
+
+/**
+ * Uploads a product image file to Firebase Storage.
+ * Returns the public download URL of the uploaded image.
+ */
+export async function uploadProductImage(file: File): Promise<string> {
+  if (!isFirebaseConfigured || !storage) {
+    throw new Error("Firebase Storage is not configured.");
+  }
+
+  try {
+    const fileExtension = file.name.split(".").pop() || "jpg";
+    const uniqueFileName = `products/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExtension}`;
+    const storageRef = ref(storage, uniqueFileName);
+
+    // Upload the file
+    const snapshot = await uploadBytes(storageRef, file);
+
+    // Get and return public download URL
+    const downloadUrl = await getDownloadURL(snapshot.ref);
+    return downloadUrl;
+  } catch (error) {
+    console.error("Error uploading image to Firebase Storage:", error);
+    throw error;
+  }
+}
+
