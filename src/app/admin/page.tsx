@@ -319,7 +319,7 @@ export default function AdminPage() {
             Manage storefront picks 🎀
           </div>
           <h1 className="text-xl font-extrabold tracking-tight text-neutral-800">
-            Kwang Picks Admin
+            BabyLoony's Reviews Admin
           </h1>
         </div>
 
@@ -624,21 +624,6 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Alternative URL paste */}
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 mb-1">Or Paste Image URL (Alternative)</label>
-                    <input
-                      type="text"
-                      placeholder="https://images.unsplash.com/..."
-                      value={formData.images}
-                      onChange={(e) => {
-                        setFormData(prev => ({ ...prev, images: e.target.value }));
-                        setPreviewUrl(e.target.value.split(",")[0]?.trim() || "");
-                        setSelectedFile(null);
-                      }}
-                      className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
-                    />
-                  </div>
 
                   <div>
                     <label className="block text-[10px] font-bold text-neutral-500 mb-1">TikTok Video URL</label>

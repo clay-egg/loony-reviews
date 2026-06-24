@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kwang Picks 🎀 Cute finds & honest reviews",
+  title: "BabyLoony's Reviews 🌸 Cute finds & honest reviews",
   description: "Browse aesthetic products reviewed on TikTok, read honest verdict summaries, and buy them directly.",
 };
 

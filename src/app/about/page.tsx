@@ -22,7 +22,7 @@ export default function AboutPage() {
             {/* Avatar */}
             <div className="relative mb-3.5">
               <div className="h-14 w-14 rounded-full bg-pink-100 border border-pink-200 flex items-center justify-center text-pink-500 font-extrabold text-sm shadow-sm">
-                kwang
+                loony
               </div>
               <div className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-white border border-pink-100 text-[8px] shadow-sm">
                 🎀
@@ -34,7 +34,7 @@ export default function AboutPage() {
             </span>
             
             <h1 className="text-base font-extrabold text-neutral-800 mb-2">
-              Hey, I'm Kwang! 💖
+              Hey, I'm BabyLoony! 💖
             </h1>
             
             <p className="text-[11px] text-neutral-500 leading-relaxed mb-6">
@@ -42,7 +42,7 @@ export default function AboutPage() {
             </p>
 
             <a
-              href="mailto:hello@kwangpicks.com"
+              href="mailto:hello@babyloony.com"
               className="w-full"
             >
               <Button

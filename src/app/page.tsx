@@ -69,7 +69,7 @@ export default function Home() {
             <Heart className="absolute h-4 w-4 fill-pink-400 text-pink-400 animate-pulse" />
           </div>
           <p className="mt-4 text-[10px] font-bold text-pink-400 tracking-wider animate-pulse uppercase">
-            Loading kwang's cute picks... 🎀
+            Loading BabyLoony's cute picks... 🎀
           </p>
         </main>
         <Footer />
@@ -92,7 +92,7 @@ export default function Home() {
           </div>
           
           <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight mb-1 text-neutral-800">
-            Kwang Picks
+            BabyLoony's Reviews
           </h1>
           
           <p className="max-w-md mx-auto text-[10px] sm:text-xs text-neutral-500 mb-4 leading-relaxed">

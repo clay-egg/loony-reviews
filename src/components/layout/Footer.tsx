@@ -14,7 +14,7 @@ export function Footer() {
                 <Heart className="h-4 w-4 fill-pink-400 text-pink-400" />
               </div>
               <span className="font-extrabold text-neutral-800">
-                kwang<span className="text-pink-400">picks</span>
+                BabyLoony's <span className="text-pink-400">Reviews 🌸</span>
               </span>
             </Link>
             <p className="max-w-xs text-[11px] leading-relaxed text-neutral-500 mb-1">
@@ -30,13 +30,13 @@ export function Footer() {
             <h3 className="text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2.5">Socials</h3>
             <ul className="space-y-1 text-xs">
               <li>
-                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition">TikTok: @kwangpicks</a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition">TikTok: @babyloony.reviews</a>
               </li>
               <li>
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition">Instagram: @kwangpicks</a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-pink-500 transition">Instagram: @babyloony.reviews</a>
               </li>
               <li>
-                <span className="text-neutral-400">Contact: hello@kwangpicks.com</span>
+                <span className="text-neutral-400">Contact: hello@babyloony.com</span>
               </li>
             </ul>
           </div>
@@ -62,7 +62,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t border-pink-100/60 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px]">
-          <p>© {new Date().getFullYear()} kwangpicks. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} BabyLoony's Reviews. All rights reserved.</p>
           <p className="flex items-center gap-1">
             Made with <Heart className="h-3 w-3 text-pink-400 fill-pink-400 animate-pulse" /> for TikTok fans.
           </p>

@@ -31,7 +31,7 @@ export function Navbar() {
             <Heart className="h-4 w-4 fill-pink-400 text-pink-400 animate-pulse" />
           </div>
           <span className="text-neutral-800 font-extrabold tracking-tight">
-            kwang<span className="text-pink-400">picks</span>
+            BabyLoony's <span className="text-pink-400">Reviews</span>
           </span>
         </Link>
 
@@ -41,9 +41,8 @@ export function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-pink-500 ${
-                isActive(item.href) ? "text-pink-500" : "text-neutral-500"
-              }`}
+              className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-pink-500 ${isActive(item.href) ? "text-pink-500" : "text-neutral-500"
+                }`}
             >
               {item.label}
             </Link>
@@ -81,11 +80,10 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`text-sm font-bold py-2 px-3 rounded-xl transition-colors ${
-                  isActive(item.href)
+                className={`text-sm font-bold py-2 px-3 rounded-xl transition-colors ${isActive(item.href)
                     ? "bg-pink-50 text-pink-500"
                     : "text-neutral-600 hover:bg-pink-50/50 hover:text-pink-500"
-                }`}
+                  }`}
               >
                 {item.label}
               </Link>
