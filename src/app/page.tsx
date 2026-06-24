@@ -1,31 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SearchBar } from "@/components/products/SearchBar";
 import { CategoryFilter } from "@/components/products/CategoryFilter";
 import { ProductGrid } from "@/components/products/ProductGrid";
-import { SAMPLE_PRODUCTS, CATEGORIES } from "@/data/sample-products";
+import { fetchProducts, getCategories } from "@/lib/products-service";
+import { Product } from "@/types/product";
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  useEffect(() => {
+    let isMounted = true;
+    async function loadData() {
+      try {
+        const data = await fetchProducts();
+        if (isMounted) {
+          setProducts(data);
+          setCategories(getCategories(data));
+        }
+      } catch (error) {
+        console.error("Error loading products:", error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+    loadData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Filter products based on search query and selected category
-  const filteredProducts = SAMPLE_PRODUCTS.filter((product) => {
+  const filteredProducts = products.filter((product) => {
+    const title = product.title || "";
+    const description = product.description || "";
+    const reviewSummary = product.reviewSummary || "";
+    const category = product.category || "";
+
     const matchesSearch =
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.reviewSummary.toLowerCase().includes(searchQuery.toLowerCase());
+      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      reviewSummary.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCategory =
       selectedCategory.toLowerCase() === "all" ||
-      product.category.toLowerCase() === selectedCategory.toLowerCase();
+      category.toLowerCase() === selectedCategory.toLowerCase();
 
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32] selection:bg-pink-100 selection:text-pink-600">
+        <Navbar />
+        <main className="flex-1 flex flex-col items-center justify-center py-24">
+          <div className="relative flex items-center justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-pink-100 border-t-pink-400"></div>
+            <Heart className="absolute h-4 w-4 fill-pink-400 text-pink-400 animate-pulse" />
+          </div>
+          <p className="mt-4 text-[10px] font-bold text-pink-400 tracking-wider animate-pulse uppercase">
+            Loading kwang's cute picks... 🎀
+          </p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32] selection:bg-pink-100 selection:text-pink-600">
@@ -55,7 +105,7 @@ export default function Home() {
 
           <div className="flex items-center justify-center max-w-md mx-auto mt-2">
             <CategoryFilter
-              categories={CATEGORIES}
+              categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
             />
@@ -79,3 +129,4 @@ export default function Home() {
     </div>
   );
 }
+

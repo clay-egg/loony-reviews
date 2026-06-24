@@ -4,6 +4,7 @@ import React from "react";
 import { ExternalLink, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShopLinks } from "@/types/product";
+import { trackProductClick } from "@/lib/products-service";
 
 interface BuyButtonProps {
   shopLinks: ShopLinks;
@@ -56,8 +57,7 @@ export function BuyButton({ shopLinks, productId, className = "", size = "defaul
   }
 
   const handleTrackClick = (platform: string) => {
-    // Analytics tracking will be hooked up here in later phases.
-    console.log(`Product Clicked: ${productId} on platform ${platform}`);
+    trackProductClick(productId, platform);
   };
 
   return (

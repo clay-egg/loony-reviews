@@ -8,14 +8,15 @@ interface RatingStarsProps {
 }
 
 export function RatingStars({ rating, className = "", showNumber = false }: RatingStarsProps) {
-  const fullStars = Math.floor(rating);
-  const hasHalf = rating % 1 >= 0.25 && rating % 1 < 0.75;
-  const roundedRating = rating % 1 >= 0.75 ? Math.ceil(rating) : fullStars;
+  const safeRating = typeof rating === "number" && !isNaN(rating) ? rating : 0;
+  const fullStars = Math.floor(safeRating);
+  const hasHalf = safeRating % 1 >= 0.25 && safeRating % 1 < 0.75;
+  const roundedRating = safeRating % 1 >= 0.75 ? Math.ceil(safeRating) : fullStars;
   
   const starsArray = [];
   
   // Add full stars
-  for (let i = 0; i < (rating % 1 >= 0.75 ? roundedRating : fullStars); i++) {
+  for (let i = 0; i < (safeRating % 1 >= 0.75 ? roundedRating : fullStars); i++) {
     starsArray.push("full");
   }
   
@@ -61,7 +62,7 @@ export function RatingStars({ rating, className = "", showNumber = false }: Rati
       </div>
       {showNumber && (
         <span className="text-[11px] font-bold text-neutral-600 ml-1">
-          {rating.toFixed(1)}
+          {safeRating.toFixed(1)}
         </span>
       )}
     </div>

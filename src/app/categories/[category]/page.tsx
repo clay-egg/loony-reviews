@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, ArrowLeft } from "lucide-react";
@@ -8,7 +8,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CategoryFilter } from "@/components/products/CategoryFilter";
 import { ProductGrid } from "@/components/products/ProductGrid";
-import { SAMPLE_PRODUCTS, CATEGORIES } from "@/data/sample-products";
+import { fetchProducts, getCategories } from "@/lib/products-service";
+import { Product } from "@/types/product";
 
 interface PageProps {
   params: Promise<{ category: string }>;
@@ -24,9 +25,36 @@ export default function CategoryPage({ params }: PageProps) {
   // Decode category parameter
   const decodedCategory = decodeURIComponent(categoryParam);
 
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadData() {
+      try {
+        const data = await fetchProducts();
+        if (isMounted) {
+          setProducts(data);
+          setCategories(getCategories(data));
+        }
+      } catch (error) {
+        console.error("Error loading products:", error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+    loadData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Filter products by category
-  const filteredProducts = SAMPLE_PRODUCTS.filter(
-    (product) => product.category.toLowerCase() === decodedCategory.toLowerCase()
+  const filteredProducts = products.filter(
+    (product) => (product.category || "").toLowerCase() === decodedCategory.toLowerCase()
   );
 
   const handleSelectCategory = (category: string) => {
@@ -36,6 +64,24 @@ export default function CategoryPage({ params }: PageProps) {
       router.push(`/categories/${encodeURIComponent(category)}`);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32]">
+        <Navbar />
+        <main className="flex-1 flex flex-col items-center justify-center py-24">
+          <div className="relative flex items-center justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-pink-100 border-t-pink-400"></div>
+            <Heart className="absolute h-4 w-4 fill-pink-400 text-pink-400 animate-pulse" />
+          </div>
+          <p className="mt-4 text-[10px] font-bold text-pink-400 tracking-wider animate-pulse uppercase">
+            Exploring category... 🎀
+          </p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32]">
@@ -65,7 +111,7 @@ export default function CategoryPage({ params }: PageProps) {
         {/* Category Filter Chips */}
         <div className="flex items-center justify-center mb-6 bg-white border border-pink-100 p-2.5 rounded-2xl shadow-sm">
           <CategoryFilter
-            categories={CATEGORIES}
+            categories={categories}
             selectedCategory={decodedCategory}
             onSelectCategory={handleSelectCategory}
           />

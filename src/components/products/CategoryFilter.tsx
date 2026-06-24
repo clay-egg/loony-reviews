@@ -18,8 +18,8 @@ export function CategoryFilter({
   return (
     <div className={`w-full overflow-x-auto scrollbar-none py-2 ${className}`}>
       <div className="flex gap-2 px-1">
-        {categories.map((category) => {
-          const isSelected = selectedCategory.toLowerCase() === category.toLowerCase();
+        {categories.filter(Boolean).map((category) => {
+          const isSelected = (selectedCategory || "").toLowerCase() === (category || "").toLowerCase();
           return (
             <button
               key={category}
