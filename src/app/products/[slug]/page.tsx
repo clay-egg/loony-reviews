@@ -6,7 +6,6 @@ import { ArrowLeft, Heart, AlertCircle } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { BuyButton } from "@/components/products/BuyButton";
-import { TikTokEmbed } from "@/components/products/TikTokEmbed";
 import { fetchProductBySlug } from "@/lib/products-service";
 import { Product } from "@/types/product";
 
@@ -120,10 +119,8 @@ export default function ProductDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Rating, Price & Title */}
+          {/* Title & Description */}
           <div>
-
-
             <h1 className="text-base font-extrabold text-neutral-800 mb-2 leading-tight">
               {product.title}
             </h1>
@@ -133,28 +130,22 @@ export default function ProductDetailPage({ params }: PageProps) {
               {product.description}
             </p>
 
-            {/* Verdict Summary Block */}
-            <div className="bg-pink-50/30 border border-pink-100/40 rounded-xl p-3 mb-4">
-              <h3 className="text-[8px] font-extrabold uppercase tracking-widest text-neutral-400 mb-0.5">
-                Verdict Summary 🎀
-              </h3>
-              <p className="text-xs text-pink-500 font-bold leading-relaxed italic">
-                "{product.reviewSummary}"
+            {/* Verdict Quote */}
+            {product.reviewSummary && (
+              <p className="text-[11px] text-pink-500 font-medium italic leading-relaxed mb-3">
+                🌸 "{product.reviewSummary}"
               </p>
-            </div>
+            )}
           </div>
 
-          {/* Watch TikTok Video Section */}
+          {/* Direct Buy & Video Buttons */}
           <div className="border-t border-pink-50 pt-3">
-            <TikTokEmbed url={product.tiktokUrl} className="w-full" />
-          </div>
-
-          {/* Direct Buy Buttons */}
-          <div className="border-t border-pink-50 pt-3">
-            <h4 className="text-[8px] font-extrabold text-neutral-400 mb-2 uppercase tracking-widest text-center">
-              Shop Direct Links
-            </h4>
-            <BuyButton shopLinks={product.shopLinks} productId={product.id} size="sm" />
+            <BuyButton 
+              shopLinks={product.shopLinks} 
+              productId={product.id} 
+              size="sm" 
+              tiktokUrl={product.tiktokUrl} 
+            />
           </div>
         </div>
       </main>

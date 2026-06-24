@@ -50,7 +50,6 @@ const emptyForm = {
     tiktokShop: "",
     shopee: "",
     lazada: "",
-    amazon: "",
   },
   isFeatured: false,
   isHidden: false,
@@ -111,7 +110,6 @@ export default function AdminPage() {
         tiktokShop: product.shopLinks?.tiktokShop || "",
         shopee: product.shopLinks?.shopee || "",
         lazada: product.shopLinks?.lazada || "",
-        amazon: product.shopLinks?.amazon || "",
       },
       isFeatured: !!product.isFeatured,
       isHidden: !!product.isHidden,
@@ -208,7 +206,6 @@ export default function AdminPage() {
         tiktokShop: formData.shopLinks.tiktokShop || "",
         shopee: formData.shopLinks.shopee || "",
         lazada: formData.shopLinks.lazada || "",
-        amazon: formData.shopLinks.amazon || "",
       },
       pros: [], // Hardcoded fallback
       cons: [], // Hardcoded fallback
@@ -702,19 +699,7 @@ export default function AdminPage() {
                       className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 mb-1">Amazon Link</label>
-                    <input
-                      type="text"
-                      placeholder="https://amazon.com/..."
-                      value={formData.shopLinks.amazon}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        shopLinks: { ...prev.shopLinks, amazon: e.target.value } 
-                      }))}
-                      className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
-                    />
-                  </div>
+
                 </div>
               </div>
 

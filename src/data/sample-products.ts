@@ -18,8 +18,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     shopLinks: {
       shopee: "https://shopee.com/sample-peach-tint",
       lazada: "https://lazada.com/sample-peach-tint",
-      tiktokShop: "https://shop.tiktok.com/sample-peach-tint",
-      amazon: "https://amazon.com/dp/B08XPEACH"
+      tiktokShop: "https://shop.tiktok.com/sample-peach-tint"
     },
     pros: [
       "Super hydrating, velvety formula",
@@ -51,8 +50,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     ],
     tiktokUrl: "https://www.tiktok.com/@ootdfinds/video/7234567890123456789",
     shopLinks: {
-      shopee: "https://shopee.com/sample-bow-cardigan",
-      amazon: "https://amazon.com/dp/B08XBOWCARD"
+      shopee: "https://shopee.com/sample-bow-cardigan"
     },
     pros: [
       "Extremely soft cloud-yarn material",
@@ -86,8 +84,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     shopLinks: {
       shopee: "https://shopee.com/sample-sunset-lamp",
       lazada: "https://lazada.com/sample-sunset-lamp",
-      tiktokShop: "https://shop.tiktok.com/sample-sunset-lamp",
-      amazon: "https://amazon.com/dp/B08XYZ1234"
+      tiktokShop: "https://shop.tiktok.com/sample-sunset-lamp"
     },
     pros: [
       "16 vibrant color transitions",
@@ -119,8 +116,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     ],
     tiktokUrl: "https://www.tiktok.com/@keyboardsetup/video/7456789012345678901",
     shopLinks: {
-      shopee: "https://shopee.com/sample-k8-keyboard",
-      amazon: "https://amazon.com/dp/B09ABC5678"
+      shopee: "https://shopee.com/sample-k8-keyboard"
     },
     pros: [
       "Superb 'thacky' sound profile with pre-lubed switches",
@@ -217,8 +213,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     ],
     tiktokUrl: "https://www.tiktok.com/@deskfinds/video/7789012345678901234",
     shopLinks: {
-      shopee: "https://shopee.com/sample-desk-organizer",
-      amazon: "https://amazon.com/dp/B08XORGAN"
+      shopee: "https://shopee.com/sample-desk-organizer"
     },
     pros: [
       "Incredibly cheap price point",
@@ -252,8 +247,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     shopLinks: {
       shopee: "https://shopee.com/sample-cat-charger",
       lazada: "https://lazada.com/sample-cat-charger",
-      tiktokShop: "https://shop.tiktok.com/sample-cat-charger",
-      amazon: "https://amazon.com/dp/B08XCHARG"
+      tiktokShop: "https://shop.tiktok.com/sample-cat-charger"
     },
     pros: [
       "Fast 15W Qi-wireless charging",
@@ -316,8 +310,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     ],
     tiktokUrl: "https://www.tiktok.com/@slipperfinds/video/7912345678901234567",
     shopLinks: {
-      shopee: "https://shopee.com/sample-fuzzy-slippers",
-      amazon: "https://amazon.com/dp/B08XSLIPPERS"
+      shopee: "https://shopee.com/sample-fuzzy-slippers"
     },
     pros: [
       "Extremely warm and cozy fleece",

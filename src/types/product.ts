@@ -2,7 +2,6 @@ export interface ShopLinks {
   shopee?: string;
   lazada?: string;
   tiktokShop?: string;
-  amazon?: string;
 }
 
 export interface Product {
@@ -29,6 +28,6 @@ export interface Product {
 export interface ProductClick {
   id?: string;
   productId: string;
-  platform: 'shopee' | 'lazada' | 'tiktokShop' | 'amazon' | string;
+  platform: 'shopee' | 'lazada' | 'tiktokShop' | string;
   clickedAt: string;
 }
