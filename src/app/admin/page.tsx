@@ -290,8 +290,12 @@ export default function AdminPage() {
     if (uploadedImageUrl) {
       finalImages = [uploadedImageUrl];
     } else {
-      // Fallback to whatever was in the text field
-      finalImages = formData.images.split(",").map(img => img.trim()).filter(Boolean);
+      const rawImages = formData.images.trim();
+      if (rawImages.startsWith("data:")) {
+        finalImages = [rawImages];
+      } else {
+        finalImages = rawImages.split(",").map(img => img.trim()).filter(Boolean);
+      }
     }
 
     const cleanedPayload = {
