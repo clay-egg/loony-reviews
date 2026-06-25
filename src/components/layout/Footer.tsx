@@ -73,7 +73,7 @@ export function Footer() {
                 <Link href="/" className="hover:text-pink-500 transition">Home</Link>
               </li>
               <li>
-                <Link href="/products" className="hover:text-pink-500 transition">All Products</Link>
+                <Link href="/" className="hover:text-pink-500 transition">All Products</Link>
               </li>
               <li>
                 <Link href="/about" className="hover:text-pink-500 transition">About Me</Link>
