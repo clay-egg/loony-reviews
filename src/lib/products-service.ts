@@ -5,7 +5,6 @@ import {
   where, 
   doc, 
   updateDoc, 
-  increment, 
   limit,
   addDoc,
   deleteDoc,
@@ -104,40 +103,10 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     return staticProduct || null;
   }
 }
-
-/**
- * Dynamically tracks product affiliate clicks by incrementing a Firestore counter
- * and adding a log to a nested 'clicks' history collection.
- */
-export async function trackProductClick(productId: string, platform?: string): Promise<void> {
-  if (!isFirebaseConfigured || !db) {
-    console.log(`Static Mode: Clicked affiliate link for product ${productId} (${platform || 'unknown'})`);
-    return;
-  }
-
-  try {
-    const productRef = doc(db, "products", productId);
-    await updateDoc(productRef, {
-      clickCount: increment(1),
-      updatedAt: new Date(),
-    });
-
-    // Log the transaction in a separate clicks log collection
-    const clicksRef = collection(db, "clicks");
-    await addDoc(clicksRef, {
-      productId,
-      platform: platform || "unknown",
-      clickedAt: new Date(),
-    });
-  } catch (error) {
-    console.error(`Error tracking click for product ${productId}:`, error);
-  }
-}
-
 /**
  * Creates a new product in Firestore.
  */
-export async function createProduct(productData: Omit<Product, "id" | "createdAt" | "updatedAt" | "clickCount">): Promise<string> {
+export async function createProduct(productData: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<string> {
   if (!isFirebaseConfigured || !db) {
     throw new Error("Firebase is not configured. Cannot perform write operations.");
   }
@@ -146,7 +115,6 @@ export async function createProduct(productData: Omit<Product, "id" | "createdAt
     const productsRef = collection(db, "products");
     const docRef = await addDoc(productsRef, {
       ...productData,
-      clickCount: 0,
       isFeatured: productData.isFeatured || false,
       isHidden: productData.isHidden || false,
       createdAt: new Date(),

@@ -20,14 +20,6 @@ export interface Product {
   cons: string[];
   isFeatured: boolean;
   isHidden?: boolean;
-  clickCount: number;
   createdAt: string; // ISO string representation of Firestore timestamp
   updatedAt: string; // ISO string representation of Firestore timestamp
-}
-
-export interface ProductClick {
-  id?: string;
-  productId: string;
-  platform: 'shopee' | 'lazada' | 'tiktokShop' | string;
-  clickedAt: string;
 }

@@ -4,7 +4,6 @@ import React from "react";
 import { ExternalLink, ShoppingBag, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShopLinks } from "@/types/product";
-import { trackProductClick } from "@/lib/products-service";
 
 interface BuyButtonProps {
   shopLinks: ShopLinks;
@@ -57,10 +56,6 @@ export function BuyButton({ shopLinks, productId, className = "", size = "defaul
     );
   }
 
-  const handleTrackClick = (platform: string) => {
-    trackProductClick(productId, platform);
-  };
-
   return (
     <div className={`grid gap-1.5 w-full ${activePlatforms.length > 1 ? "grid-cols-2" : "grid-cols-1"} ${className}`}>
       {activePlatforms.map((platform) => {
@@ -71,7 +66,6 @@ export function BuyButton({ shopLinks, productId, className = "", size = "defaul
             href={platform.url}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => handleTrackClick(platform.key)}
             className="w-full block"
           >
             <Button

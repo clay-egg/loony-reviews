@@ -31,7 +31,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Slightly transfers on cups initially"
     ],
     isFeatured: true,
-    clickCount: 1542,
     createdAt: "2026-06-01T10:00:00Z",
     updatedAt: "2026-06-15T12:30:00Z"
   },
@@ -63,7 +62,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Buttons can feel slightly loose out of the box"
     ],
     isFeatured: false,
-    clickCount: 924,
     createdAt: "2026-06-03T11:00:00Z",
     updatedAt: "2026-06-12T09:20:00Z"
   },
@@ -97,7 +95,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "USB power adapter is not included in the box"
     ],
     isFeatured: true,
-    clickCount: 1245,
     createdAt: "2026-06-01T10:00:00Z",
     updatedAt: "2026-06-15T12:30:00Z"
   },
@@ -129,7 +126,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Companion software takes time to configure"
     ],
     isFeatured: false,
-    clickCount: 843,
     createdAt: "2026-06-05T08:15:00Z",
     updatedAt: "2026-06-16T14:20:00Z"
   },
@@ -163,7 +159,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Capacity is relatively small (14 oz)"
     ],
     isFeatured: false,
-    clickCount: 512,
     createdAt: "2026-06-10T11:45:00Z",
     updatedAt: "2026-06-10T11:45:00Z"
   },
@@ -195,7 +190,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Sakura blossom scent can be subtle"
     ],
     isFeatured: false,
-    clickCount: 618,
     createdAt: "2026-06-12T14:30:00Z",
     updatedAt: "2026-06-12T14:30:00Z"
   },
@@ -226,7 +220,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Dividers are fixed in place"
     ],
     isFeatured: false,
-    clickCount: 1105,
     createdAt: "2026-06-08T09:15:00Z",
     updatedAt: "2026-06-14T11:40:00Z"
   },
@@ -260,7 +253,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Cannot charge with thick metal phone cases"
     ],
     isFeatured: true,
-    clickCount: 1845,
     createdAt: "2026-06-14T08:00:00Z",
     updatedAt: "2026-06-17T15:00:00Z"
   },
@@ -292,7 +284,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Single-use only"
     ],
     isFeatured: false,
-    clickCount: 421,
     createdAt: "2026-06-15T09:00:00Z",
     updatedAt: "2026-06-15T09:00:00Z"
   },
@@ -323,7 +314,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
       "Hand wash only to preserve plush feel"
     ],
     isFeatured: true,
-    clickCount: 1420,
     createdAt: "2026-06-16T10:00:00Z",
     updatedAt: "2026-06-16T10:00:00Z"
   }
