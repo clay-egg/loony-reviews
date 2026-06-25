@@ -12,7 +12,15 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className = "" }: ProductCardProps) {
-  const primaryImage = product.images?.[0] || "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80";
+  const getValidImage = (images?: string[]) => {
+    const fallback = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80";
+    const first = images?.[0];
+    if (!first) return fallback;
+    if (first.startsWith("data:") && !first.includes(",")) return fallback;
+    if (first === "data:image/jpeg;base64") return fallback;
+    return first;
+  };
+  const primaryImage = getValidImage(product.images);
 
   return (
     <article

@@ -660,7 +660,11 @@ export default function AdminPage() {
                 <div className="flex items-start gap-3">
                   <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border border-pink-50 bg-pink-50/10">
                     <img 
-                      src={product.images?.[0] || "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=150&q=80"} 
+                      src={
+                        product.images?.[0] && !(product.images[0].startsWith("data:") && !product.images[0].includes(",")) && product.images[0] !== "data:image/jpeg;base64"
+                          ? product.images[0]
+                          : "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=150&q=80"
+                      } 
                       alt={product.title} 
                       className="h-full w-full object-cover"
                     />

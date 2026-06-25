@@ -84,7 +84,15 @@ export default function ProductDetailPage({ params }: PageProps) {
     );
   }
 
-  const primaryImage = product.images[0];
+  const getValidImage = (images?: string[]) => {
+    const fallback = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80";
+    const first = images?.[0];
+    if (!first) return fallback;
+    if (first.startsWith("data:") && !first.includes(",")) return fallback;
+    if (first === "data:image/jpeg;base64") return fallback;
+    return first;
+  };
+  const primaryImage = getValidImage(product.images);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32]">
