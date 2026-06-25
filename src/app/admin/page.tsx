@@ -268,18 +268,13 @@ export default function AdminPage() {
 
     try {
       if (selectedFile) {
-        if (isFirebaseConfigured) {
-          // Upload to Firebase Storage
-          uploadedImageUrl = await uploadProductImage(selectedFile);
-        } else {
-          // Fallback to local Base64 string in Static Mode
-          uploadedImageUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = (err) => reject(err);
-            reader.readAsDataURL(selectedFile);
-          });
-        }
+        // Convert to Base64 string to store directly in Firestore (bypassing Firebase Storage)
+        uploadedImageUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(selectedFile);
+        });
       }
     } catch (uploadError) {
       console.error("Image upload error:", uploadError);
