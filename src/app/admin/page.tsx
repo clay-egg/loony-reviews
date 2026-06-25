@@ -28,7 +28,9 @@ import {
   updateProduct, 
   deleteProduct, 
   toggleProductVisibility,
-  uploadProductImage
+  uploadProductImage,
+  fetchStorefrontSettings,
+  updateStorefrontSettings
 } from "@/lib/products-service";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { Product } from "@/types/product";
@@ -70,15 +72,23 @@ export default function AdminPage() {
   const [formData, setFormData] = useState(emptyForm);
   const [notification, setNotification] = useState<Notification | null>(null);
 
-  // Load products
+  // Storefront Settings State
+  const [heroDescInput, setHeroDescInput] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  // Load products and settings
   async function loadData() {
     setLoading(true);
     try {
-      const data = await fetchProducts(true);
-      setProducts(data);
+      const [productsData, settingsData] = await Promise.all([
+        fetchProducts(true),
+        fetchStorefrontSettings()
+      ]);
+      setProducts(productsData);
+      setHeroDescInput(settingsData.heroDescription);
     } catch (error) {
-      console.error("Error loading products in admin:", error);
-      showNotification("Error loading products from database", "error");
+      console.error("Error loading admin data:", error);
+      showNotification("Error loading data from database", "error");
     } finally {
       setLoading(false);
     }
@@ -87,6 +97,31 @@ export default function AdminPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Save storefront settings
+  const handleSaveSettings = async () => {
+    if (!heroDescInput.trim()) {
+      showNotification("Hero description cannot be empty!", "error");
+      return;
+    }
+
+    setSavingSettings(true);
+    try {
+      if (isFirebaseConfigured) {
+        await updateStorefrontSettings({ heroDescription: heroDescInput });
+        showNotification("Storefront settings updated successfully! 🎀", "success");
+      } else {
+        // Static mode fallback
+        console.log("Static Mode: Simulating storefront settings update:", { heroDescription: heroDescInput });
+        showNotification("Static Mode: Settings update simulated! 🎀", "success");
+      }
+    } catch (error) {
+      console.error("Error saving storefront settings:", error);
+      showNotification("Failed to update storefront settings.", "error");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const showNotification = (message: string, type: "success" | "error" | "warning") => {
     setNotification({ message, type });
@@ -346,6 +381,35 @@ export default function AdminPage() {
           <div className="bg-white border border-pink-100 rounded-2xl p-3 text-center shadow-sm">
             <p className="text-[8px] uppercase tracking-widest text-neutral-400 font-extrabold">Hidden Picks</p>
             <p className="text-lg font-black text-neutral-400 mt-0.5">{hiddenPicks}🔒</p>
+          </div>
+        </div>
+
+        {/* Storefront Settings Card */}
+        <div className="bg-white border border-pink-100 rounded-2xl p-4 shadow-sm mb-6">
+          <h2 className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400 mb-3">
+            Storefront Settings
+          </h2>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-500 mb-1">Hero Description</label>
+              <textarea
+                value={heroDescInput}
+                onChange={(e) => setHeroDescInput(e.target.value)}
+                rows={3}
+                className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium resize-y"
+                placeholder="Enter homepage hero description..."
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={handleSaveSettings}
+                disabled={savingSettings}
+                size="sm"
+                className="cursor-pointer bg-pink-400 hover:bg-pink-500 text-white rounded-full text-[10px] font-bold h-7.5 px-4 shadow-sm border border-pink-400 transition-all flex items-center gap-1"
+              >
+                {savingSettings ? "Saving..." : "Save Settings"}
+              </Button>
+            </div>
           </div>
         </div>
 

@@ -7,7 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SearchBar } from "@/components/products/SearchBar";
 import { CategoryFilter } from "@/components/products/CategoryFilter";
 import { ProductGrid } from "@/components/products/ProductGrid";
-import { fetchProducts, getCategories } from "@/lib/products-service";
+import { fetchProducts, getCategories, fetchStorefrontSettings } from "@/lib/products-service";
 import { Product } from "@/types/product";
 
 export default function Home() {
@@ -16,15 +16,20 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [heroDescription, setHeroDescription] = useState("Browse products she reviewed on TikTok and find direct shopping links in one sweet little place.");
 
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
       try {
-        const data = await fetchProducts();
+        const [productsData, settingsData] = await Promise.all([
+          fetchProducts(),
+          fetchStorefrontSettings()
+        ]);
         if (isMounted) {
-          setProducts(data);
-          setCategories(getCategories(data));
+          setProducts(productsData);
+          setCategories(getCategories(productsData));
+          setHeroDescription(settingsData.heroDescription);
         }
       } catch (error) {
         console.error("Error loading products:", error);
@@ -95,8 +100,8 @@ export default function Home() {
             BabyLoony's Reviews
           </h1>
           
-          <p className="max-w-md mx-auto text-[10px] sm:text-xs text-neutral-500 mb-4 leading-relaxed">
-            Browse products she reviewed on TikTok and find direct shopping links in one sweet little place.
+          <p className="max-w-md mx-auto text-[10px] sm:text-xs text-neutral-500 mb-4 leading-relaxed whitespace-pre-line">
+            {heroDescription}
           </p>
 
           <div className="flex justify-center w-full mb-3">

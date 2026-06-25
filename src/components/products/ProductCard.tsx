@@ -56,9 +56,9 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
             </h3>
           </Link>
 
-          {/* Review Summary (1-2 line short review only) */}
+          {/* Description */}
           <p className="mt-1 text-[10px] text-neutral-500 line-clamp-2 leading-relaxed">
-            {product.reviewSummary}
+            {product.description}
           </p>
         </div>
 

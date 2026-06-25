@@ -8,7 +8,9 @@ import {
   increment, 
   limit,
   addDoc,
-  deleteDoc
+  deleteDoc,
+  getDoc,
+  setDoc
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage, isFirebaseConfigured } from "./firebase";
@@ -36,6 +38,11 @@ export async function fetchProducts(includeHidden: boolean = false): Promise<Pro
 
     const products: Product[] = [];
     querySnapshot.forEach((docSnap) => {
+      // Filter out internal configurations/settings documents
+      if (docSnap.id.startsWith("_")) {
+        return;
+      }
+
       const data = docSnap.data();
       
       // Filter out hidden products in memory if includeHidden is false
@@ -63,6 +70,10 @@ export async function fetchProducts(includeHidden: boolean = false): Promise<Pro
  * Falls back to SAMPLE_PRODUCTS lookup.
  */
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
+  if (slug.startsWith("_")) {
+    return null;
+  }
+
   if (!isFirebaseConfigured || !db) {
     const staticProduct = SAMPLE_PRODUCTS.find((p) => p.slug === slug);
     return staticProduct || null;
@@ -244,6 +255,53 @@ export async function uploadProductImage(file: File): Promise<string> {
     return downloadUrl;
   } catch (error) {
     console.error("Error uploading image to Firebase Storage:", error);
+    throw error;
+  }
+}
+
+export interface StorefrontSettings {
+  heroDescription: string;
+}
+
+const DEFAULT_SETTINGS: StorefrontSettings = {
+  heroDescription: "Browse products she reviewed on TikTok and find direct shopping links in one sweet little place.",
+};
+
+/**
+ * Fetches the storefront settings (like hero description) from Firestore.
+ * Falls back to DEFAULT_SETTINGS if Firebase is not configured or fails.
+ */
+export async function fetchStorefrontSettings(): Promise<StorefrontSettings> {
+  if (!isFirebaseConfigured || !db) {
+    return DEFAULT_SETTINGS;
+  }
+
+  try {
+    const settingsRef = doc(db, "products", "_settings");
+    const docSnap = await getDoc(settingsRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as StorefrontSettings;
+    }
+    return DEFAULT_SETTINGS;
+  } catch (error) {
+    console.error("Error fetching storefront settings from Firestore:", error);
+    return DEFAULT_SETTINGS;
+  }
+}
+
+/**
+ * Updates the storefront settings in Firestore.
+ */
+export async function updateStorefrontSettings(settingsData: StorefrontSettings): Promise<void> {
+  if (!isFirebaseConfigured || !db) {
+    throw new Error("Firebase is not configured. Cannot perform write operations.");
+  }
+
+  try {
+    const settingsRef = doc(db, "products", "_settings");
+    await setDoc(settingsRef, settingsData, { merge: true });
+  } catch (error) {
+    console.error("Error updating storefront settings in Firestore:", error);
     throw error;
   }
 }
