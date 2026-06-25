@@ -23,6 +23,13 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  User 
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { 
   fetchProducts, 
   createProduct, 
   updateProduct, 
@@ -76,6 +83,14 @@ export default function AdminPage() {
   const [heroDescInput, setHeroDescInput] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
 
+  // Auth States
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginSubmitting, setLoginSubmitting] = useState(false);
+
   // Load products and settings
   async function loadData() {
     setLoading(true);
@@ -95,8 +110,65 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    loadData();
+    if (!isFirebaseConfigured || !auth) {
+      setUser({ email: "static-admin@example.com" } as User);
+      setAuthLoading(false);
+      loadData();
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setAuthLoading(false);
+      if (firebaseUser) {
+        const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "myatminhan03@gmail.com";
+        if (firebaseUser.email?.toLowerCase() === adminEmail.toLowerCase()) {
+          loadData();
+        }
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
+
+  // Handle Login
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    
+    if (!loginEmail.trim() || !loginPassword.trim()) {
+      setLoginError("Please fill in all fields.");
+      return;
+    }
+
+    if (!auth) {
+      setLoginError("Firebase authentication is not configured.");
+      return;
+    }
+
+    setLoginSubmitting(true);
+    try {
+      await signInWithEmailAndPassword(auth, loginEmail.trim(), loginPassword);
+      showNotification("Signed in successfully! 🌸", "success");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setLoginError(error.message || "Invalid email or password.");
+    } finally {
+      setLoginSubmitting(false);
+    }
+  };
+
+  // Handle Logout
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+      await signOut(auth);
+      showNotification("Signed out successfully.", "success");
+    } catch (error) {
+      console.error("Logout error:", error);
+      showNotification("Error signing out.", "error");
+    }
+  };
 
   // Save storefront settings
   const handleSaveSettings = async () => {
@@ -317,6 +389,129 @@ export default function AdminPage() {
   const totalPicks = products.length;
   const hiddenPicks = products.filter(p => p.isHidden).length;
 
+  if (authLoading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32] selection:bg-pink-100 selection:text-pink-600">
+        <Navbar />
+        <main className="flex-1 flex flex-col items-center justify-center py-24">
+          <div className="relative flex items-center justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-pink-100 border-t-pink-400"></div>
+            <Heart className="absolute h-4 w-4 fill-pink-400 text-pink-400 animate-pulse" />
+          </div>
+          <p className="mt-4 text-[10px] font-bold text-pink-400 tracking-wider animate-pulse uppercase">
+            Verifying Admin Session... 🎀
+          </p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32] selection:bg-pink-100 selection:text-pink-600">
+        <Navbar />
+        <main className="flex-1 flex flex-col items-center justify-center px-4 py-16">
+          <div className="w-full max-w-sm bg-white border border-pink-100 rounded-3xl p-6 shadow-sm">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-1 rounded-full bg-pink-100/80 border border-pink-200 px-3 py-0.5 text-[9px] font-bold text-pink-500 mb-1.5 shadow-sm">
+                <Heart className="h-3 w-3 fill-pink-400 text-pink-400" />
+                Authorized Access Only 🎀
+              </div>
+              <h1 className="text-xl font-extrabold text-neutral-800">Admin Login</h1>
+              <p className="text-[10px] text-neutral-400 mt-1">Please sign in to manage storefront picks.</p>
+            </div>
+
+            {loginError && (
+              <div className="bg-red-50 border border-red-200 text-red-500 rounded-2xl p-3 mb-4 text-[10px] font-semibold leading-relaxed flex gap-2 items-center">
+                <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-neutral-500 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="admin@example.com"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="w-full text-xs border border-pink-100 rounded-xl px-3 py-2 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-neutral-500 mb-1">Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className="w-full text-xs border border-pink-100 rounded-xl px-3 py-2 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loginSubmitting}
+                className="cursor-pointer w-full bg-pink-400 hover:bg-pink-500 text-white rounded-full text-xs font-bold h-9 shadow-sm border border-pink-400 transition-all flex items-center justify-center gap-1.5"
+              >
+                {loginSubmitting ? (
+                  <>
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <span>Signing in...</span>
+                  </>
+                ) : (
+                  <span>Sign In</span>
+                )}
+              </Button>
+            </form>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "myatminhan03@gmail.com";
+  const isAuthorized = user.email?.toLowerCase() === adminEmail.toLowerCase();
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32] selection:bg-pink-100 selection:text-pink-600">
+        <Navbar />
+        <main className="flex-1 flex flex-col items-center justify-center px-4 py-16 text-center">
+          <div className="w-full max-w-sm bg-white border border-pink-100 rounded-3xl p-6 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-400 mb-3 border border-red-100 mx-auto">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <h1 className="text-sm font-bold text-neutral-800 mb-1">Access Denied 🔒</h1>
+            <p className="text-[10px] text-neutral-500 max-w-xs mb-4 leading-relaxed mx-auto">
+              The account <strong>{user.email}</strong> is not authorized to access the Admin Console.
+            </p>
+            <div className="flex gap-2">
+              <Link href="/" className="flex-1">
+                <Button className="cursor-pointer w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 rounded-full text-[10px] font-bold h-8">
+                  Back to Store
+                </Button>
+              </Link>
+              <Button
+                onClick={handleLogout}
+                className="cursor-pointer flex-1 bg-red-400 hover:bg-red-500 text-white rounded-full text-[10px] font-bold h-8 border border-red-400"
+              >
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-[#fff7f8] text-[#3f2d32] selection:bg-pink-100 selection:text-pink-600">
       <Navbar />
@@ -329,9 +524,18 @@ export default function AdminPage() {
             Back to store
           </Link>
           
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400 bg-pink-100/50 border border-pink-100 px-2.5 py-0.5 rounded-full">
-            Admin Console
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-bold text-neutral-400 bg-pink-100/30 border border-pink-100 px-2 py-0.5 rounded-full">
+              {user.email}
+            </span>
+            <Button
+              onClick={handleLogout}
+              size="sm"
+              className="cursor-pointer bg-white hover:bg-red-50 text-red-400 border border-red-100 rounded-full text-[9px] font-bold h-6 px-2.5 shadow-sm transition-all"
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         {/* Warning Banner if Static Fallback */}

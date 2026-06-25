@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -21,12 +22,14 @@ const isFirebaseConfigured =
 let app;
 let db: ReturnType<typeof getFirestore> | null = null;
 let storage: ReturnType<typeof getStorage> | null = null;
+let auth: ReturnType<typeof getAuth> | null = null;
 
 if (isFirebaseConfigured) {
   try {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     db = getFirestore(app);
     storage = getStorage(app);
+    auth = getAuth(app);
   } catch (error) {
     console.error("Error initializing Firebase:", error);
   }
@@ -38,4 +41,4 @@ if (isFirebaseConfigured) {
   }
 }
 
-export { app, db, storage, isFirebaseConfigured };
+export { app, db, storage, auth, isFirebaseConfigured };

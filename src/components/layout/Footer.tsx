@@ -1,8 +1,32 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Sparkles, Heart } from "lucide-react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, isFirebaseConfigured } from "@/lib/firebase";
 
 export function Footer() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured || !auth) {
+      setIsAdmin(true); // default to visible in static local fallback mode
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "myatminhan03@gmail.com";
+        setIsAdmin(user.email?.toLowerCase() === adminEmail.toLowerCase());
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <footer className="w-full border-t border-pink-100 bg-pink-50/40 py-10 text-neutral-500">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -54,9 +78,11 @@ export function Footer() {
               <li>
                 <Link href="/about" className="hover:text-pink-500 transition">About Me</Link>
               </li>
-              <li>
-                <Link href="/admin" className="hover:text-pink-500 transition flex items-center gap-0.5">Admin Console 🔑</Link>
-              </li>
+              {isAdmin && (
+                <li>
+                  <Link href="/admin" className="hover:text-pink-500 transition flex items-center gap-0.5">Admin Console 🔑</Link>
+                </li>
+              )}
             </ul>
           </div>
         </div>

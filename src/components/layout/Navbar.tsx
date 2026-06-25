@@ -1,14 +1,35 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Heart, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, isFirebaseConfigured } from "@/lib/firebase";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured || !auth) {
+      setIsAdmin(true); // default to visible in static local fallback mode
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "myatminhan03@gmail.com";
+        setIsAdmin(user.email?.toLowerCase() === adminEmail.toLowerCase());
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -50,14 +71,16 @@ export function Navbar() {
         </nav>
 
         {/* Desktop CTA / Admin Link */}
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/admin">
-            <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-pink-500 hover:bg-pink-50 text-xs font-bold gap-1.5 rounded-full border border-pink-100/50 bg-white px-4">
-              <Shield className="h-3.5 w-3.5 text-pink-400" />
-              Admin
-            </Button>
-          </Link>
-        </div>
+        {isAdmin && (
+          <div className="hidden md:flex items-center gap-4">
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="text-neutral-500 hover:text-pink-500 hover:bg-pink-50 text-xs font-bold gap-1.5 rounded-full border border-pink-100/50 bg-white px-4">
+                <Shield className="h-3.5 w-3.5 text-pink-400" />
+                Admin
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Mobile menu button */}
         <div className="flex md:hidden items-center gap-2">
@@ -88,15 +111,19 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
-            <hr className="border-pink-100/60 my-1.5" />
-            <Link
-              href="/admin"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 text-sm font-bold text-neutral-600 hover:bg-pink-50/50 hover:text-pink-500 py-2 px-3 rounded-xl"
-            >
-              <Shield className="h-4 w-4 text-pink-400" />
-              Admin Dashboard
-            </Link>
+            {isAdmin && (
+              <>
+                <hr className="border-pink-100/60 my-1.5" />
+                <Link
+                  href="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 text-sm font-bold text-neutral-600 hover:bg-pink-50/50 hover:text-pink-500 py-2 px-3 rounded-xl"
+                >
+                  <Shield className="h-4 w-4 text-pink-400" />
+                  Admin Dashboard
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
