@@ -37,7 +37,8 @@ import {
   toggleProductVisibility,
   uploadProductImage,
   fetchStorefrontSettings,
-  updateStorefrontSettings
+  updateStorefrontSettings,
+  compressAndEncodeImage
 } from "@/lib/products-service";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import { Product } from "@/types/product";
@@ -207,13 +208,8 @@ export default function AdminPage() {
     try {
       let uploadedUrl = aboutAvatarInput;
       if (profileFile) {
-        // Convert to Base64 string to store directly in Firestore (bypassing Firebase Storage)
-        uploadedUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = (err) => reject(err);
-          reader.readAsDataURL(profileFile);
-        });
+        // Compress and convert to Base64 string (bypassing Firebase Storage)
+        uploadedUrl = await compressAndEncodeImage(profileFile);
         setAboutAvatarInput(uploadedUrl);
         setProfileFile(null); // Reset file selection
       }
@@ -315,13 +311,8 @@ export default function AdminPage() {
 
     try {
       if (selectedFile) {
-        // Convert to Base64 string to store directly in Firestore (bypassing Firebase Storage)
-        uploadedImageUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = (err) => reject(err);
-          reader.readAsDataURL(selectedFile);
-        });
+        // Compress and convert to Base64 string (bypassing Firebase Storage)
+        uploadedImageUrl = await compressAndEncodeImage(selectedFile);
       }
     } catch (uploadError) {
       console.error("Image upload error:", uploadError);

@@ -1,6 +1,19 @@
 # Loony Reviews Storefront
 
-A mobile-first product reviews storefront built with Next.js 16 (App Router), Tailwind CSS, and Firebase Firestore. This application serves as a showcase for curated product reviews, complete with affiliate links, category filtering, search functionality, and a secured administration console.
+A mobile-first product reviews storefront built with Next.js (App Router), Tailwind CSS, and Firebase Firestore. 
+
+### 🇹🇭 Tailored for Social Reviewers in Thailand
+This application is designed specifically for content creators and influencers in Thailand who review aesthetic products on social media platforms (such as TikTok) and share affiliate shop links (such as **Shopee Thailand** or **Lazada Thailand**). It provides followers with a clean, centralized, girly-themed storefront to easily browse reviews and access direct shopping links in one sweet place.
+
+---
+
+## Screenshots Reference
+
+> [!NOTE]
+> Save screenshots to the `/public/screenshots/` folder to display them here:
+> - **Homepage Storefront:** `![Homepage Storefront](/public/screenshots/homepage.png)`
+> - **Admin Dashboard:** `![Admin Dashboard](/public/screenshots/admin.png)`
+> - **About Page:** `![About Page](/public/screenshots/about.png)`
 
 ---
 
@@ -8,19 +21,25 @@ A mobile-first product reviews storefront built with Next.js 16 (App Router), Ta
 
 ### 1. Storefront Catalog & Product Views
 * **Dynamic Product Grid**: Renders products stored in Firestore. Features responsive, mobile-first cards showing key details (name, rating, price, and category) with direct navigation.
-* **Affiliate Link Redirection**: Direct affiliate shopping links integrated via dedicated action buttons.
+* **Affiliate Link Redirection**: Direct affiliate shopping links integrated via dedicated action buttons (Shopee, Lazada, TikTok Shop).
 * **Category Filtering**: Automatically aggregates distinct categories from the product list and provides active filter chips to easily narrow down the catalog.
 * **Catalog Search**: Real-time client-side search filtering that updates the product grid as the user types, matching against product names and descriptions.
-* **Dynamic Details Pages**: Slug-based routing (`/products/[slug]`) displaying the product's full information, rating, price, affiliate purchase links, and external video review links.
+* **Dynamic Details Pages**: Slug-based routing (`/products/[slug]`) displaying the product's full information, rating, price, affiliate purchase links, and external video review links inside a clean card frame.
 
-### 2. Administration Portal (`/admin`)
+### 2. Dynamic & Customizable About Page (`/about`)
+* **Dynamic Typography & Biography**: Renders title heading and biography paragraphs dynamically loaded from Firestore. If fields are cleared by the administrator, they render conditionally to keep the layout clean.
+* **Dynamic Avatar Upload**: Allows custom profile avatar image rendering, loaded dynamically from settings.
+* **Thai E-commerce & Social Links**: Features brand-compliant follow buttons for **TikTok Thailand** (`/tiktok.svg`) and **Shopee Thailand** (`/shopee.svg`).
+* **Cardless Split Layout**: Responsive desktop design rendering profile avatar on the left and biographic info on the right, stacking vertically on mobile.
+
+### 3. Secured Administration Portal (`/admin`)
 * **Secure Login**: Protected portal utilizing Firebase Authentication (Email & Password provider).
-* **Access Control Guard**: Enforces authorization at the application layer by verifying the logged-in user's email against the `NEXT_PUBLIC_ADMIN_EMAIL` environment variable. Unmatched accounts are signed out and redirected.
-* **Product Catalog CRUD**: Administrators can add new products, update existing product attributes, toggle product visibility (hide/show), and delete items directly from the database.
-* **Storefront Settings Customization**: A dedicated settings panel allows the administrator to dynamically edit and update the homepage hero description.
-* **Conditional Navigation Display**: Listens to the authentication state client-side to conditionally expose or hide admin routing links in the global `Navbar` and `Footer` components.
+* **Access Control Guard**: Enforces authorization by verifying the logged-in user's email against the `NEXT_PUBLIC_ADMIN_EMAIL` environment variable. Unmatched accounts are signed out automatically.
+* **Product Catalog CRUD**: Administrators can add new products, update product attributes, toggle product visibility (hide/show), and delete items.
+* **Dynamic Catalog Search**: Real-time search box allowing administrators to filter product lists by title, description, or category instantly.
+* **Toggleable Storefront Settings**: A dedicated, collapsible settings card (hidden by default under "Edit Profile & Settings") to configure homepage description, About title, biography paragraphs, and upload a custom profile picture.
 
-### 3. Data Storage & Image Handling
+### 4. Data Storage & Image Handling
 * **Base64 Image Pipeline**: Image files uploaded through the admin console are converted to Base64 data strings in the browser using `FileReader.readAsDataURL()`. The resulting string is saved directly within the Firestore product document, bypassing the need for Firebase Storage configuration.
 * **Defensive Image Verification**: Front-end components parse the image attribute using check utilities (`startsWith("data:image/")`). If the data URL is malformed, missing, or truncated, the app automatically falls back to an inline SVG placeholder, preventing broken images and `net::ERR_INVALID_URL` errors.
 * **Single-Collection Settings Storage**: Storefront configurations (such as the hero description text) are saved inside the `/products` collection under a dedicated document ID `_settings`. The data fetching functions (`fetchProducts` and `fetchProductBySlug`) explicitly ignore document IDs starting with `_` to prevent administrative configurations from appearing in the shoppable catalog.
