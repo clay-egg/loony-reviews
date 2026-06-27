@@ -202,6 +202,53 @@ export function getCategories(products: Product[]): string[] {
 }
 
 /**
+ * Compresses and encodes an image file to a Base64 JPEG data URL.
+ * Resizes the image to fit within maxWidth/maxHeight and compresses it to the specified quality.
+ */
+export function compressAndEncodeImage(file: File, maxWidth = 800, maxHeight = 800, quality = 0.7): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Failed to get 2D context"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(dataUrl);
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+}
+
+/**
  * Uploads a product image file to Firebase Storage.
  * Returns the public download URL of the uploaded image.
  */
@@ -229,10 +276,18 @@ export async function uploadProductImage(file: File): Promise<string> {
 
 export interface StorefrontSettings {
   heroDescription: string;
+  aboutTitle?: string;
+  aboutBio1?: string;
+  aboutBio2?: string;
+  aboutAvatarUrl?: string;
 }
 
 const DEFAULT_SETTINGS: StorefrontSettings = {
-  heroDescription: "Browse products she reviewed on TikTok and find direct shopping links in one sweet little place.",
+  heroDescription: "รวมพิกัดของรีวิวน่ารักๆ จาก TikTok ช้อปง่ายตรงปก พร้อมลิงก์ตรงจากร้านค้าในไทย 🎀",
+  aboutTitle: "สวัสดีค่า เบบี้ลูนี่เอง! 🎀✨",
+  aboutBio1: "ยินดีต้อนรับสู่แหล่งรวมพิกัดของกุ๊กกิ๊กที่เรารีวิวใน TikTok นะคะ! เราชอบตามล่าหาของแต่งห้อง เครื่องเขียน และไอเท็มบิวตี้ลายน่ารักๆ สไตล์มินิมอลอยู่แล้ว เลยอยากแชร์ต่อความคิวท์ให้ทุกคนค่ะ",
+  aboutBio2: "ทุกไอเท็มบนเพจนี้ผ่านการใช้งานจริงและคัดมาแล้วว่าดีต่อใจแน่นอนค่ะ สามารถกดปุ่มนำทางช้อปปิ้งออนไลน์ไปยัง Shopee/Lazada ร้านค้าตรงได้ทันทีเลยน้า ขอบคุณสำหรับการสนับสนุนค่ะ! 💕",
+  aboutAvatarUrl: "/Profile.JPG",
 };
 
 /**
