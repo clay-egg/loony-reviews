@@ -9,8 +9,6 @@ This application is designed specifically for content creators and influencers i
 
 ## Screenshots Reference
 
-> [!NOTE]
-> Create the folder `public/screenshots/` and save your screenshots there to display them:
 > - **Homepage Storefront:** ![Homepage Storefront](./public/screenshots/homepage.png)
 > - **Admin Dashboard:** ![Admin Dashboard](./public/screenshots/admin.png)
 > - **About Page:** ![About Page](./public/screenshots/about.png)
