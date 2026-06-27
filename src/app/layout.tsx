@@ -16,8 +16,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BabyLoony's Reviews 🌸 Cute finds & honest reviews",
-  description: "Browse aesthetic products reviewed on TikTok, read honest verdict summaries, and buy them directly.",
+  title: {
+    default: "BabyLoony's Reviews 🌸 Cute & Aesthetic Finds",
+    template: "%s | BabyLoony's Reviews 🎀"
+  },
+  description: "รวมพิกัดของรีวิวน่ารักๆ จาก TikTok ช้อปง่ายตรงปก ของแต่งห้อง เครื่องเขียน และบิวตี้ไอเท็มสุดคิวท์ พร้อมลิงก์ตรงจากร้านค้าในไทย 100% 🎀",
+  keywords: ["BabyLoony", "รีวิวของน่ารัก", "พิกัด Shopee", "แต่งห้องมินิมอล", "เครื่องเขียนน่ารัก", "รีวิว TikTok", "ของกุ๊กกิ๊ก"],
+  authors: [{ name: "BabyLoony" }],
+  openGraph: {
+    title: "BabyLoony's Reviews 🌸 Cute & Aesthetic Finds",
+    description: "รวมพิกัดของรีวิวน่ารักๆ จาก TikTok ช้อปง่ายตรงปก ของแต่งห้อง เครื่องเขียน และบิวตี้ไอเท็มสุดคิวท์ พร้อมลิงก์ตรงจากร้านค้าในไทย 100% 🎀",
+    type: "website",
+    locale: "th_TH",
+    siteName: "BabyLoony's Reviews"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BabyLoony's Reviews 🌸 Cute & Aesthetic Finds",
+    description: "รวมพิกัดของรีวิวน่ารักๆ จาก TikTok ช้อปง่ายตรงปก พร้อมลิงก์ตรงจากร้านค้าในไทย 100% 🎀"
+  },
+  robots: {
+    index: true,
+    follow: true
+  },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg"
+  }
 };
 
 export default function RootLayout({
