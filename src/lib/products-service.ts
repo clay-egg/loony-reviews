@@ -229,10 +229,18 @@ export async function uploadProductImage(file: File): Promise<string> {
 
 export interface StorefrontSettings {
   heroDescription: string;
+  aboutTitle?: string;
+  aboutBio1?: string;
+  aboutBio2?: string;
+  aboutAvatarUrl?: string;
 }
 
 const DEFAULT_SETTINGS: StorefrontSettings = {
   heroDescription: "Browse products she reviewed on TikTok and find direct shopping links in one sweet little place.",
+  aboutTitle: "Hey, I'm BabyLoony! ✨",
+  aboutBio1: "I'm a TikTok creator obsessed with finding and sharing the absolute cutest, most aesthetic products online.",
+  aboutBio2: "On this page, you'll find direct shopping links and my 100% honest reviews for every item featured in my videos. No gatekeeping, no redirection scams—just cozy vibes and products I truly love.",
+  aboutAvatarUrl: "/Profile.JPG",
 };
 
 /**

@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  ArrowLeft, 
-  Heart, 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Eye, 
-  EyeOff, 
-  Sparkles, 
-  ShoppingBag, 
-  X, 
+import {
+  ArrowLeft,
+  Heart,
+  Plus,
+  Edit2,
+  Trash2,
+  Eye,
+  EyeOff,
+  Sparkles,
+  ShoppingBag,
+  X,
   AlertTriangle,
   ExternalLink,
   Save,
@@ -22,18 +22,18 @@ import {
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { 
-  signInWithEmailAndPassword, 
-  signOut, 
+import {
+  signInWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
-  User 
+  User
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { 
-  fetchProducts, 
-  createProduct, 
-  updateProduct, 
-  deleteProduct, 
+import {
+  fetchProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
   toggleProductVisibility,
   uploadProductImage,
   fetchStorefrontSettings,
@@ -69,7 +69,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   // File Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -81,7 +81,27 @@ export default function AdminPage() {
 
   // Storefront Settings State
   const [heroDescInput, setHeroDescInput] = useState("");
+  const [aboutTitleInput, setAboutTitleInput] = useState("");
+  const [aboutBio1Input, setAboutBio1Input] = useState("");
+  const [aboutBio2Input, setAboutBio2Input] = useState("");
+  const [aboutAvatarInput, setAboutAvatarInput] = useState("");
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [profilePreviewUrl, setProfilePreviewUrl] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter products based on search query
+  const filteredProducts = products.filter((product) => {
+    const title = product.title || "";
+    const description = product.description || "";
+    const category = product.category || "";
+    const query = searchQuery.toLowerCase();
+    return (
+      title.toLowerCase().includes(query) ||
+      description.toLowerCase().includes(query) ||
+      category.toLowerCase().includes(query)
+    );
+  });
 
   // Auth States
   const [user, setUser] = useState<User | null>(null);
@@ -101,6 +121,11 @@ export default function AdminPage() {
       ]);
       setProducts(productsData);
       setHeroDescInput(settingsData.heroDescription);
+      setAboutTitleInput(settingsData.aboutTitle || "");
+      setAboutBio1Input(settingsData.aboutBio1 || "");
+      setAboutBio2Input(settingsData.aboutBio2 || "");
+      setAboutAvatarInput(settingsData.aboutAvatarUrl || "/Profile.JPG");
+      setProfilePreviewUrl(settingsData.aboutAvatarUrl || "/Profile.JPG");
     } catch (error) {
       console.error("Error loading admin data:", error);
       showNotification("Error loading data from database", "error");
@@ -135,7 +160,7 @@ export default function AdminPage() {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
-    
+
     if (!loginEmail.trim() || !loginPassword.trim()) {
       setLoginError("Please fill in all fields.");
       return;
@@ -179,12 +204,33 @@ export default function AdminPage() {
 
     setSavingSettings(true);
     try {
+      let uploadedUrl = aboutAvatarInput;
+      if (profileFile) {
+        // Convert to Base64 string to store directly in Firestore (bypassing Firebase Storage)
+        uploadedUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(profileFile);
+        });
+        setAboutAvatarInput(uploadedUrl);
+        setProfileFile(null); // Reset file selection
+      }
+
+      const updatedSettings = {
+        heroDescription: heroDescInput,
+        aboutTitle: aboutTitleInput,
+        aboutBio1: aboutBio1Input,
+        aboutBio2: aboutBio2Input,
+        aboutAvatarUrl: uploadedUrl,
+      };
+
       if (isFirebaseConfigured) {
-        await updateStorefrontSettings({ heroDescription: heroDescInput });
+        await updateStorefrontSettings(updatedSettings);
         showNotification("Storefront settings updated successfully! 🎀", "success");
       } else {
         // Static mode fallback
-        console.log("Static Mode: Simulating storefront settings update:", { heroDescription: heroDescInput });
+        console.log("Static Mode: Simulating storefront settings update:", updatedSettings);
         showNotification("Static Mode: Settings update simulated! 🎀", "success");
       }
     } catch (error) {
@@ -356,7 +402,7 @@ export default function AdminPage() {
         console.log(`Static Mode: Simulating visibility toggle for ${product.id} to ${newHiddenState}`);
       }
       showNotification(
-        newHiddenState 
+        newHiddenState
           ? `"${product.title}" is now hidden 🔒`
           : `"${product.title}" is now visible 👁️`,
         "success"
@@ -522,7 +568,7 @@ export default function AdminPage() {
             <ArrowLeft className="h-3 w-3" />
             Back to store
           </Link>
-          
+
           <div className="flex items-center gap-2">
             <span className="text-[9px] font-bold text-neutral-400 bg-pink-100/30 border border-pink-100 px-2 py-0.5 rounded-full">
               {user.email}
@@ -563,13 +609,12 @@ export default function AdminPage() {
 
         {/* Toast Notification */}
         {notification && (
-          <div className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-lg border transition-all duration-300 animate-in fade-in slide-in-from-bottom-3 ${
-            notification.type === "success" 
-              ? "bg-pink-50 border-pink-200 text-pink-500" 
+          <div className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-lg border transition-all duration-300 animate-in fade-in slide-in-from-bottom-3 ${notification.type === "success"
+              ? "bg-pink-50 border-pink-200 text-pink-500"
               : notification.type === "warning"
-              ? "bg-amber-50 border-amber-200 text-amber-700"
-              : "bg-red-50 border-red-200 text-red-500"
-          }`}>
+                ? "bg-amber-50 border-amber-200 text-amber-700"
+                : "bg-red-50 border-red-200 text-red-500"
+            }`}>
             {notification.type === "success" && <CheckCircle2 className="h-4 w-4 text-pink-400 fill-pink-50" />}
             <span>{notification.message}</span>
           </div>
@@ -579,11 +624,11 @@ export default function AdminPage() {
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="bg-white border border-pink-100 rounded-2xl p-3 text-center shadow-sm">
             <p className="text-[8px] uppercase tracking-widest text-neutral-400 font-extrabold">Total Picks</p>
-            <p className="text-lg font-black text-pink-500 mt-0.5">{totalPicks}🌸</p>
+            <p className="text-lg font-black text-pink-500 mt-0.5">{totalPicks}</p>
           </div>
           <div className="bg-white border border-pink-100 rounded-2xl p-3 text-center shadow-sm">
             <p className="text-[8px] uppercase tracking-widest text-neutral-400 font-extrabold">Hidden Picks</p>
-            <p className="text-lg font-black text-neutral-400 mt-0.5">{hiddenPicks}🔒</p>
+            <p className="text-lg font-black text-neutral-400 mt-0.5">{hiddenPicks}</p>
           </div>
         </div>
 
@@ -603,6 +648,60 @@ export default function AdminPage() {
                 placeholder="Enter homepage hero description..."
               />
             </div>
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-500 mb-1">About Profile Photo</label>
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-full overflow-hidden border border-pink-100 bg-pink-50 flex-shrink-0">
+                  {profilePreviewUrl ? (
+                    <img src={profilePreviewUrl} alt="About Avatar Preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-xs text-neutral-300 font-bold">No Image</div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setProfileFile(file);
+                      setProfilePreviewUrl(URL.createObjectURL(file));
+                    }
+                  }}
+                  className="text-xs text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:bg-pink-100 file:text-pink-500 hover:file:bg-pink-200/70 file:cursor-pointer cursor-pointer"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-500 mb-1">About Page Title</label>
+              <input
+                type="text"
+                value={aboutTitleInput}
+                onChange={(e) => setAboutTitleInput(e.target.value)}
+                className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
+                placeholder="e.g. Hey, I'm BabyLoony! ✨"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-500 mb-1">About Bio Paragraph 1</label>
+              <textarea
+                value={aboutBio1Input}
+                onChange={(e) => setAboutBio1Input(e.target.value)}
+                rows={3}
+                className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium resize-y"
+                placeholder="Enter first bio paragraph..."
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-neutral-500 mb-1">About Bio Paragraph 2</label>
+              <textarea
+                value={aboutBio2Input}
+                onChange={(e) => setAboutBio2Input(e.target.value)}
+                rows={3}
+                className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium resize-y"
+                placeholder="Enter second bio paragraph..."
+              />
+            </div>
             <div className="flex justify-end">
               <Button
                 onClick={handleSaveSettings}
@@ -617,18 +716,38 @@ export default function AdminPage() {
         </div>
 
         {/* Action Button & List */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">
-            Catalog Items ({products.length})
-          </h2>
-          <Button 
-            onClick={handleAddNewClick} 
-            size="sm" 
-            className="cursor-pointer bg-pink-400 hover:bg-pink-500 text-white rounded-full text-[10px] font-bold h-7.5 px-3 shadow-sm border border-pink-400 transition-all flex items-center gap-1"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add Cute Pick
-          </Button>
+        <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-between sm:justify-start gap-4">
+            <h2 className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">
+              Catalog Items {products.length > 0 ? `(${filteredProducts.length} of ${products.length})` : `(${products.length})`}
+            </h2>
+            <Button
+              onClick={handleAddNewClick}
+              size="sm"
+              className="cursor-pointer bg-pink-400 hover:bg-pink-500 text-white rounded-full text-[10px] font-bold h-7.5 px-3 shadow-sm border border-pink-400 transition-all flex items-center gap-1"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Cute Pick
+            </Button>
+          </div>
+          {/* Search box input */}
+          <div className="relative w-full sm:w-60">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full text-xs border border-pink-100 rounded-full px-4 py-1.5 focus:outline-none focus:border-pink-400 bg-white placeholder-neutral-300 font-medium shadow-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-pink-500 text-[10px] font-bold select-none"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         {loading ? (
@@ -645,26 +764,29 @@ export default function AdminPage() {
           <div className="bg-white border border-pink-100 rounded-2xl p-12 text-center shadow-sm">
             <p className="text-xs text-neutral-400">No products found. Click "Add Cute Pick" to create your first item! 🌸</p>
           </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="bg-white border border-pink-100 rounded-2xl p-12 text-center shadow-sm">
+            <p className="text-xs text-neutral-400">No products match your search query "{searchQuery}" 🔍</p>
+          </div>
         ) : (
           /* Mobile-First Card List Layout */
           <div className="flex flex-col gap-3">
-            {products.map((product) => (
-              <div 
-                key={product.id} 
-                className={`bg-white border rounded-2xl p-3 shadow-sm transition-all flex flex-col gap-2.5 ${
-                  product.isHidden ? "border-pink-50 bg-neutral-50/50 opacity-80" : "border-pink-100 hover:border-pink-200"
-                }`}
+            {filteredProducts.map((product) => (
+              <div
+                key={product.id}
+                className={`bg-white border rounded-2xl p-3 shadow-sm transition-all flex flex-col gap-2.5 ${product.isHidden ? "border-pink-50 bg-neutral-50/50 opacity-80" : "border-pink-100 hover:border-pink-200"
+                  }`}
               >
                 {/* Product Core Info */}
                 <div className="flex items-start gap-3">
                   <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border border-pink-50 bg-pink-50/10">
-                    <img 
+                    <img
                       src={
                         product.images?.[0] && !(product.images[0].startsWith("data:") && !product.images[0].includes(",")) && product.images[0] !== "data:image/jpeg;base64"
                           ? product.images[0]
                           : "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=150&q=80"
-                      } 
-                      alt={product.title} 
+                      }
+                      alt={product.title}
                       className="h-full w-full object-cover"
                     />
                   </div>
@@ -686,7 +808,7 @@ export default function AdminPage() {
                         </span>
                       )}
                     </div>
-                    
+
                     <h3 className="text-xs font-bold text-neutral-800 truncate mt-1">
                       {product.title}
                     </h3>
@@ -708,11 +830,10 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleToggleVisibility(product)}
                       title={product.isHidden ? "Make Visible" : "Hide Product"}
-                      className={`cursor-pointer h-7 w-7 rounded-full flex items-center justify-center border transition-all ${
-                        product.isHidden 
-                          ? "bg-neutral-100 text-neutral-400 border-neutral-200 hover:bg-neutral-200" 
+                      className={`cursor-pointer h-7 w-7 rounded-full flex items-center justify-center border transition-all ${product.isHidden
+                          ? "bg-neutral-100 text-neutral-400 border-neutral-200 hover:bg-neutral-200"
                           : "bg-pink-50 text-pink-400 border-pink-100 hover:bg-pink-100"
-                      }`}
+                        }`}
                     >
                       {product.isHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
@@ -765,7 +886,7 @@ export default function AdminPage() {
                   {editingId ? "Edit Cute Pick" : "Add New Cute Pick"}
                 </h3>
               </div>
-              <button 
+              <button
                 onClick={() => !uploadingImage && setShowModal(false)}
                 disabled={uploadingImage}
                 className="cursor-pointer h-7 w-7 rounded-full flex items-center justify-center hover:bg-pink-50 text-neutral-400 hover:text-pink-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
@@ -781,7 +902,7 @@ export default function AdminPage() {
                 <h4 className="text-[8px] font-extrabold uppercase tracking-widest text-neutral-400 border-b border-pink-50/55 pb-1">
                   General Info
                 </h4>
-                
+
                 <div className="grid grid-cols-1 gap-2.5">
                   <div>
                     <label className="block text-[10px] font-bold text-neutral-500 mb-1">Product Title</label>
@@ -856,7 +977,7 @@ export default function AdminPage() {
                 <h4 className="text-[8px] font-extrabold uppercase tracking-widest text-neutral-400 border-b border-pink-50/55 pb-1">
                   Media & Video
                 </h4>
-                
+
                 <div className="grid grid-cols-1 gap-2.5">
                   {/* Local Photo Upload */}
                   <div>
@@ -869,7 +990,7 @@ export default function AdminPage() {
                           <ImageIcon className="h-6 w-6 text-pink-200" />
                         )}
                       </div>
-                      
+
                       <div className="flex-1 space-y-1">
                         <label className="cursor-pointer inline-flex items-center gap-1 bg-pink-100 hover:bg-pink-200/80 text-pink-500 border border-pink-200 px-3 py-1 rounded-full text-[9px] font-bold transition-all shadow-sm">
                           <Plus className="h-3 w-3" />
@@ -914,7 +1035,7 @@ export default function AdminPage() {
                 <h4 className="text-[8px] font-extrabold uppercase tracking-widest text-neutral-400 border-b border-pink-50/55 pb-1">
                   Affiliate Shop Links
                 </h4>
-                
+
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-[10px] font-bold text-neutral-500 mb-1">Shopee Link</label>
@@ -922,9 +1043,9 @@ export default function AdminPage() {
                       type="text"
                       placeholder="https://shopee.com/..."
                       value={formData.shopLinks.shopee}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        shopLinks: { ...prev.shopLinks, shopee: e.target.value } 
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        shopLinks: { ...prev.shopLinks, shopee: e.target.value }
                       }))}
                       className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
                     />
@@ -935,9 +1056,9 @@ export default function AdminPage() {
                       type="text"
                       placeholder="https://lazada.com/..."
                       value={formData.shopLinks.lazada}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        shopLinks: { ...prev.shopLinks, lazada: e.target.value } 
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        shopLinks: { ...prev.shopLinks, lazada: e.target.value }
                       }))}
                       className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
                     />
@@ -948,9 +1069,9 @@ export default function AdminPage() {
                       type="text"
                       placeholder="https://shop.tiktok.com/..."
                       value={formData.shopLinks.tiktokShop}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        shopLinks: { ...prev.shopLinks, tiktokShop: e.target.value } 
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        shopLinks: { ...prev.shopLinks, tiktokShop: e.target.value }
                       }))}
                       className="w-full text-xs border border-pink-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-pink-400 bg-pink-50/10 placeholder-neutral-300 font-medium"
                     />
@@ -970,7 +1091,7 @@ export default function AdminPage() {
                   />
                   <span>Viral Highlight ⭐️</span>
                 </label>
-                
+
                 <label className="flex items-center gap-2 text-xs font-bold text-neutral-600 cursor-pointer select-none">
                   <input
                     type="checkbox"
@@ -981,7 +1102,7 @@ export default function AdminPage() {
                   <span>Hide from Public Storefront 🔒</span>
                 </label>
               </div>
-              
+
               {/* Form Action Buttons inside Form */}
               <div className="flex gap-2 pt-4 border-t border-pink-50 shrink-0">
                 <Button
